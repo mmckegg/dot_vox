@@ -1,8 +1,12 @@
 use crate::{parser::RenderCamera, Layer, Material, Model, SceneNode};
-use std::{
-    collections::HashMap,
-    io::{self, Write},
-};
+use std::io::{self, Write};
+
+#[cfg(feature = "ahash")]
+use ahash::AHashMap as HashMap;
+
+#[cfg(not(feature = "ahash"))]
+use std::collections::HashMap;
+
 pub type Dict = HashMap<String, String>;
 
 /// Container for `.vox` file data.
