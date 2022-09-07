@@ -227,7 +227,7 @@ impl From<Position> for (i32, i32, i32) {
 pub struct Rotation {
     /// This is a row-major representation of the rotation as an orthonormal 3×3
     /// matrix. The entries are in [-1..1].
-    rot: [[i8; 3]; 3],
+    pub rot: [[i8; 3]; 3],
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Default)]
