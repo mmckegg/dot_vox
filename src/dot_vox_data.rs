@@ -28,6 +28,8 @@ pub struct DotVoxData {
     pub scenes: Vec<SceneNode>,
     /// Layers. Used by scene transform nodes.
     pub layers: Vec<Layer>,
+    /// Notes displayed next to colors in left sidebar in order of appearance
+    pub notes: Vec<String>,
 }
 
 impl DotVoxData {
