@@ -349,6 +349,8 @@ mod tests {
             render_cameras: vec![],
             scenes,
             layers,
+            notes: vec![],
+            imap: vec![],
         }
     }
 

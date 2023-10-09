@@ -30,6 +30,7 @@ pub struct DotVoxData {
     pub layers: Vec<Layer>,
     /// Notes displayed next to colors in left sidebar in order of appearance
     pub notes: Vec<String>,
+    pub imap: Vec<u8>
 }
 
 impl DotVoxData {

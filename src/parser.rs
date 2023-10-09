@@ -6,7 +6,7 @@ use nom::{
     bytes::complete::{tag, take},
     combinator::{flat_map, map_res},
     multi::{fold_many_m_n, many0, many_m_n},
-    number::complete::le_u32,
+    number::complete::{le_u32, le_u8},
     sequence::pair,
     IResult,
 };
@@ -35,6 +35,7 @@ pub enum Chunk {
     ShapeNode(SceneShape),
     Layer(RawLayer),
     Note(Vec<String>),
+    Imap(Vec<u8>),
     Unknown(String),
     Invalid(Vec<u8>),
 }
@@ -220,6 +221,7 @@ fn map_chunk_to_data(version: u32, main: Chunk) -> DotVoxData {
             let mut scene: Vec<SceneNode> = vec![];
             let mut layers: Vec<Layer> = Vec::new();
             let mut notes: Vec<String> = Vec::new();
+            let mut imap: Vec<u8> = (0..255).collect();
 
             for chunk in children {
                 match chunk {
@@ -264,6 +266,7 @@ fn map_chunk_to_data(version: u32, main: Chunk) -> DotVoxData {
                         });
                     }
                     Chunk::Note(names) => notes = names,
+                    Chunk::Imap(indices) => imap = indices,
                     _ => debug!("Unmapped chunk {:?}", chunk),
                 }
             }
@@ -277,6 +280,7 @@ fn map_chunk_to_data(version: u32, main: Chunk) -> DotVoxData {
                 render_cameras,
                 scenes: scene,
                 notes,
+                imap,
                 layers,
             }
         }
@@ -290,6 +294,7 @@ fn map_chunk_to_data(version: u32, main: Chunk) -> DotVoxData {
             notes: vec![],
             scenes: vec![],
             layers: vec![],
+            imap: vec![],
         },
     }
 }
@@ -318,6 +323,7 @@ fn build_chunk(id: &str, chunk_content: &[u8], children_size: u32, child_content
             "nSHP" => build_scene_shape_chunk(chunk_content),
             "LAYR" => build_layer_chunk(chunk_content),
             "NOTE" => build_note_chunk(chunk_content),
+            "IMAP" => build_imap_chunk(chunk_content),
             _ => {
                 debug!("Unknown childless chunk {:?}", id);
                 Chunk::Unknown(id.to_owned())
@@ -433,10 +439,19 @@ fn build_note_chunk(chunk_content: &[u8]) -> Chunk {
         _ => Chunk::Invalid(chunk_content.to_vec()),
     }
 }
+fn build_imap_chunk(chunk_content: &[u8]) -> Chunk {
+    match parse_imap(chunk_content) {
+        Ok((_, indices)) => Chunk::Imap(indices),
+        _ => Chunk::Invalid(chunk_content.to_vec()),
+    }
+}
 
 pub fn parse_note(i: &[u8]) -> IResult<&[u8], Vec<String>> {
     let (i, n) = le_u32(i)?;
     many_m_n(n as usize, n as usize, parse_string)(i)
+}
+pub fn parse_imap(i: &[u8]) -> IResult<&[u8], Vec<u8>> {
+    many_m_n(256, 256, le_u8)(i)
 }
 
 pub fn parse_material(i: &[u8]) -> IResult<&[u8], Material> {
