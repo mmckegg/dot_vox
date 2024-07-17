@@ -221,7 +221,9 @@ fn map_chunk_to_data(version: u32, main: Chunk) -> DotVoxData {
             let mut scene: Vec<SceneNode> = vec![];
             let mut layers: Vec<Layer> = Vec::new();
             let mut notes: Vec<String> = Vec::new();
-            let mut imap: Vec<u8> = (0..255).collect();
+
+            // wrap around to 1 based system, ending with 0 to be consistent with file format
+            let mut imap = (0..=255).map(|i: u8| i + 1).collect();
 
             for chunk in children {
                 match chunk {
